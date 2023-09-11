@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"io"
 
@@ -37,16 +36,6 @@ func TestResizer(c *gin.Context) {
 	}
 	
 	fmt.Printf("Uploaded file: %v\n", file.Filename)
-	
-	tempFile, err := os.CreateTemp("/home/mike/Documentos/temp-images", "upload-*.png")
-	if err != nil {
-		log.Fatalf(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": true,
-			"message": "couldn't create a temp file",
-		})
-	}
-	defer tempFile.Close()
 
 	bytes, err := file.Open()
 	if err != nil {
@@ -60,7 +49,6 @@ func TestResizer(c *gin.Context) {
 		return
 	}
 
-	tempFile.Write(fileBytes)
 
 	fmt.Println("Successfully uploaded the file")
 
