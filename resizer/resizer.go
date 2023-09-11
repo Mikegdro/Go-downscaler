@@ -2,7 +2,6 @@ package resizer
 
 import (
 	"bytes"
-	"log"
 
 	"github.com/anthonynsimon/bild/imgio"
 
@@ -11,19 +10,19 @@ import (
 	"image"
 )
 
-func Downscale(fileBytes []byte) {
+func Downscale(fileBytes []byte)(imageResized []byte, err error) {
 
 	img, _, err := image.Decode(bytes.NewReader(fileBytes))
 	if err != nil {
-		log.Fatalf(err.Error())
-		return
+		return nil, err
 	}
 
 	resized := transform.Resize(img, 400, 400, transform.Linear)
 
 	if err := imgio.Save("resized.png", resized, imgio.PNGEncoder()); err != nil {
-		log.Fatal(err)
-		return
+		return nil,  err
 	}
+
+	return imageResized, nil
 
 }

@@ -16,15 +16,18 @@ import (
 
 func main() {
 	router := gin.Default()
-	router.GET("/test", TestResizer)
+	router.GET("/upload", HandleUpload)
 
 	router.Run("localhost:8080")
 }
 
-func TestResizer(c *gin.Context) {
+// This function handles the upload of an image
+func HandleUpload(c *gin.Context) {
 
+	// Parses the file
 	c.Request.ParseMultipartForm(20 << 30)
 
+	// Retrieves the file
 	file, err := c.FormFile("image")
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -35,23 +38,42 @@ func TestResizer(c *gin.Context) {
 		return
 	}
 	
+	// Log of the file
 	fmt.Printf("Uploaded file: %v\n", file.Filename)
 
-	bytes, err := file.Open()
+	// Opens the file to geth the multipart file
+	multiFile, err := file.Open()
+	if err != nil {
+		log.Fatalf(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": true,
+			"message": "The file is corrupted",
+		})
+		return
+	}
+
+	// Converts the multipart file to a []byte
+	fileBytes, err := io.ReadAll(multiFile)
 	if err != nil {
 		log.Fatalf(err.Error())
 		return
 	}
 
-	fileBytes, err := io.ReadAll(bytes)
-	if err != nil {
-		log.Fatalf(err.Error())
-		return
-	}
-
-
+	// Logs the success
 	fmt.Println("Successfully uploaded the file")
 
-	resizer.Downscale(fileBytes)
+	// Calls the downscaler
+	imgResized, err := resizer.Downscale(fileBytes)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	UploadImages(fileBytes, imgResized)
+
+}
+
+// This function uploads images to the cloud service
+func UploadImages(image []byte, resized []byte) {
+
 }
 
